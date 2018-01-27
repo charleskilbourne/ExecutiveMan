@@ -41,7 +41,7 @@ var BossHealthBar = function(stage, boss) {
 
 		var offset = (28 - this.bars) * 2;
 		for (i = 0; i < this.bars; i++) {
-			var barItem = new createjs.Bitmap("images/bosshealthbar.png");
+			var barItem = new createjs.Bitmap("resources/images/bosshealthbar.png");
 			barItem.x = renderer.gamestage.canvas.width - 35;
 			barItem.y = i * 2 + offset + this.y + 1;
 			this.barAnimations.push(barItem);

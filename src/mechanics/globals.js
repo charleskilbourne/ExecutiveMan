@@ -168,3 +168,5 @@ var watchedElements;
 
 // the default zoom amount
 var zoomAmount;
+
+const RESOURCE_ROOT = "resources/"
