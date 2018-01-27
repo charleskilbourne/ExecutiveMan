@@ -2,3 +2,4 @@
 node_modules
 levels/
 game.min.js
+dist/game.js
