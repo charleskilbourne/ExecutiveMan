@@ -4,327 +4,7 @@
  * @param {[type]} demoParams [description]
  */
 function Player(demoMode, demoParams) {
-	var StingingAuditShot = function(player, renderer) {
-		var shotSpriteSheet = new createjs.SpriteSheet({
-			"images": [loader.getResult("moneyspin")],
-			"frames": {
-				"width": 16,
-				"height": 16,
-				"count": 2
-			},
-			"animations": {
-				"shot": {
-					"frames": [0, 1],
-					"next": "shot",
-					"speed": 0.25
-				}
-			}
-		});
-
-		this.stage = stage;
-		this.damage = 6;
-		this.animations = new createjs.Sprite(shotSpriteSheet, "shot");
-		this.disabled = true;
-		this.activated = false;
-		this.animations.play();
-		this.xspeed = 0;
-		this.yspeed = -2;
-
-		/**
-		 * [tickActions description]
-		 * @return {[type]} [description]
-		 */
-		this.tickActions = function() {
-			if (this.disabled) {
-				return;
-			}
-
-			if (!this.activated) {
-				if (this.yspeed === 0) {
-					var enemy = null;
-					var step = 1;
-					while (!enemy) {
-						for (var i = 0; i < renderer.enemies.length; i++) {
-							if (renderer.enemies[i].dead || renderer.enemies[i].y < 0 || 
-								renderer.enemies[i].y > renderer.gamestage.height || renderer.enemies[i].damage <= 0) {
-								continue;
-							}
-
-							var delta = renderer.enemies[i].x - this.x;
-							if (abs(delta) < 32 * step) {
-								enemy = renderer.enemies[i];
-								break;
-							}
-						}
-						if (step > 12) {
-							break;
-						}
-						step++;
-					}
-
-					this.activated = true;
-					this.yspeed = Math.sin(Math.atan2((enemy.y - this.y) + enemy.animations.spriteSheet._frameHeight / 2, (enemy.x - this.x) + enemy.animations.spriteSheet._frameWidth / 2)) * 2.5;
-					this.xspeed = Math.cos(Math.atan2((enemy.y - this.y), (enemy.x - this.x))) * 2.5;
-				} else {
-					this.y += this.yspeed;
-					this.yspeed += 0.0625;
-				}
-			} else {
-				renderer.enemies.forEach(function(enemy) {
-					if (enemy.dead) {
-						return;
-					}
-
-					//var intersection = ndgmrX.checkRectCollision(this.animations, enemy.animations);
-					if (fastCollisionX(this, enemy) && !(enemy.constructor === Platform || enemy.constructor === DroppingPlatform
-						 || enemy.constructor === DisappearingPlatform) && enemy.constructor !== KillCopy && enemy.constructor !== Phone) {
-
-						if (enemy.constructor === AnnoyingThing) {
-							enemy.pauseTicks = 120;
-							enemy.animations.gotoAndPlay("pause");
-						}
-
-						if (enemy.hardshell) {
-							this.x -= this.xspeed * 5;
-							this.y -= this.yspeed * 5;
-							playSound("shotbounce");
-							return;
-						}
-
-						if (enemy.constructor === ExplosiveBarrel) {
-							enemy.activated = true;
-						}
-						if (enemy.damage > 0) {
-							enemy.health -= 6 * damageModifier;
-						}
-						this.removeSelf();
-					} else if (enemy.constructor === KillCopy && fastCollisionKillCopy(this, enemy)) { 
-						// special case due to large overhang of the left side of sprite
-						if (enemy.damage > 0) {
-							enemy.health -= 6 * damageModifier;
-						}
-						this.removeSelf();
-					} else if (enemy.constructor === Phone && fastCollisionPhone(this, enemy)) { 
-						// special case due to large overhang of the left side of sprite
-						if (enemy.damage > 0) {
-							enemy.health -= 6 * damageModifier;
-						}
-						this.removeSelf();
-					}
-				}.bind(this));
-
-
-				this.x += this.xspeed;
-				this.y += this.yspeed;
-			}
-
-			if (!this.checkBounds()) {
-				this.removeSelf();
-			}
-
-			this.animations.x = this.x - renderer.completedMapsWidthOffset;
-			this.animations.y = this.y;
-		};
-
-		/**
-		 * [fireUp description]
-		 * @return {[type]} [description]
-		 */
-		this.fireUp = function() {
-			//console.log(player.x - renderer.completedMapsWidthOffset);
-			this.x = player.x + ((player.animations.scaleX === 1) ? 26 : -3);
-			this.y = player.y + 13.5;
-			this.yspeed = 0;
-			setTimeout(function() {
-				this.disabled = false;
-			}.bind(this), 500);
-
-			this.bounced = false;
-			this.activated = false;
-			this.direction = player.animations.scaleX;
-			this.animations.x = this.x - renderer.completedMapsWidthOffset;
-			this.animations.y = this.y;
-			this.animations.play();
-			renderer.enemyContainer.addChild(this.animations);
-		};
-
-		/**
-		 * [removeSelf description]
-		 * @return {[type]} [description]
-		 */
-		this.removeSelf = function() {
-			//console.log("removing");
-			renderer.enemyContainer.removeChild(this.animations);
-			var explosion = shotExplosionSprite.clone(true);
-			explosion.x = this.animations.x - this.animations.spriteSheet._frameWidth / 2;
-			explosion.y = this.animations.y - this.animations.spriteSheet._frameHeight / 2;
-			renderer.enemyContainer.removeChild(this.animations);
-			explosion.gotoAndPlay("explode");
-
-			if (this.checkBounds()) {
-				playSound("shotexplode");
-			}
-			renderer.enemyContainer.addChild(explosion);
-			setTimeout(function() {
-				renderer.enemyContainer.removeChild(explosion);
-			}.bind(this), 15.625); // approx 2 frames
-			this.disabled = true;
-		};
-
-		this.checkBounds = function() {
-			if (this.y < 0 || abs(this.y - player.y) > renderer.gamestage.canvas.height) {
-				return false;
-			}
-
-			return !(this.x < 0 || abs(this.x - (player.x)) > 400);
-		};
-	};
-
-	/**
-	 * [Shot description]
-	 * @param {[type]} player   [description]
-	 * @param {[type]} renderer [description]
-	 */
-	var Shot = function(player, renderer) {
-		var shotSpriteSheet = new createjs.SpriteSheet({
-			"images": [loader.getResult("shot")],
-			"frames": {
-				"width": 8,
-				"height": 8,
-				"count": 1
-			},
-			"animations": {
-				"shot": {
-					"frames": [0],
-					"next": "shot"
-				}
-			}
-		});
-
-		this.animations = new createjs.Sprite(shotSpriteSheet, "shot");
-		this.x = -7.5;
-		this.y = -7.5;
-		this.disabled = true;
-		this.direction = 0;
-		this.yspeed = 0;
-		this.bounced = false;
-
-		/**
-		 * [tickActions description]
-		 * @return {[type]} [description]
-		 */
-		this.tickActions = function() {
-			if (this.disabled) {
-				return;
-			}
-
-			this.x = this.x + (3.5 * this.direction);
-			this.y -= this.yspeed;
-			this.animations.x = this.x;
-			this.animations.y = this.y;
-
-			if (!this.checkBounds()) {
-				this.removeSelf();
-			}
-
-			renderer.enemies.forEach(function(enemy) {
-				if (enemy.dead) {
-					return;
-				}
-
-				//var intersection = ndgmrX.checkRectCollision(this.animations, enemy.animations);
-				if (fastCollisionX(this, enemy) && !(enemy.constructor === Platform || enemy.constructor === DroppingPlatform || enemy.constructor === DisappearingPlatform) && enemy.constructor !== KillCopy && enemy.constructor !== Phone) {
-
-					if (enemy.constructor === AnnoyingThing) {
-						enemy.pauseTicks = 120;
-						enemy.animations.gotoAndPlay("pause");
-					}
-
-					if (enemy.hardshell) {
-						this.yspeed = 3.5;
-						this.direction = this.direction * (this.bounced) ? 1 : -1;
-						this.bounced = true;
-
-						playSound("shotbounce");
-						return;
-					}
-
-					if (enemy.constructor === ExplosiveBarrel) {
-						enemy.activated = true;
-					}
-					if (enemy.damage > 0) {
-						enemy.health -= 1 * damageModifier;
-					}
-					this.removeSelf();
-				} else if (enemy.constructor === KillCopy && fastCollisionKillCopy(this, enemy)) { // special case due to large overhang of the left side of sprite
-					if (enemy.damage > 0) {
-						enemy.health -= 1 * damageModifier;
-					}
-					this.removeSelf();
-				} else if (enemy.constructor === Phone && fastCollisionPhone(this, enemy)) { // special case due to large overhang of the left side of sprite
-					if (enemy.damage > 0) {
-						enemy.health -= 1 * damageModifier;
-					}
-					this.removeSelf();
-				}
-			}.bind(this));
-		};
-
-		/**
-		 * [fireUp description]
-		 * @return {[type]} [description]
-		 */
-		this.fireUp = function() {
-			//console.log(player.x - renderer.completedMapsWidthOffset);
-			this.x = player.x - renderer.completedMapsWidthOffset + ((player.animations.scaleX === 1) ? 26 : -3);
-			this.y = player.y + 13.5;
-			this.yspeed = 0;
-			this.disabled = false;
-			this.bounced = false;
-			this.direction = player.animations.scaleX;
-			this.animations.x = this.x;
-			this.animations.y = this.y;
-			this.animations.play();
-			renderer.enemyContainer.addChild(this.animations);
-		};
-
-		/**
-		 * [removeSelf description]
-		 * @return {[type]} [description]
-		 */
-		this.removeSelf = function() {
-			//console.log("removing");
-			renderer.enemyContainer.removeChild(this.animations);
-			var explosion = shotExplosionSprite.clone(true);
-			explosion.x = this.animations.x - this.animations.spriteSheet._frameWidth / 2;
-			explosion.y = this.animations.y - this.animations.spriteSheet._frameHeight / 2;
-			renderer.enemyContainer.removeChild(this.animations);
-			explosion.gotoAndPlay("explode");
-
-			if (this.checkBounds()) {
-				playSound("shotexplode");
-			}
-			player.shots.shift();
-			renderer.enemyContainer.addChild(explosion);
-			setTimeout(function() {
-				renderer.enemyContainer.removeChild(explosion);
-			}.bind(this), 15.625); // approx 2 frames
-			this.disabled = true;
-		};
-
-		/**
-		 * [checkBounds description]
-		 * @return {[type]} [description]
-		 */
-		this.checkBounds = function() {
-			if (this.y < 0 || abs(this.y - player.y) > renderer.gamestage.canvas.height) {
-				return false;
-			}
-
-			return !(this.x < 0 || abs(this.x - (player.x - renderer.completedMapsWidthOffset)) > player.gamestage.canvas.width / 2);
-		};
-	};
-
+	
 	this.playerSpriteSheet = new createjs.SpriteSheet({
 		"images": [loader.getResult("businessman")],
 		"frames": {
@@ -456,10 +136,8 @@ function Player(demoMode, demoParams) {
 	this.shotIndex = 0;
 	this.ignoreLeftRightCollisionThisFrame = 0;
 	this.fallThroughFloor = false;
-	this.currentWeapon = "postit";
+	this.currentWeapon = new StickyNote(this, renderer);
 	var skipThisCheck = false;
-
-	this.stingingAuditShots = [new StingingAuditShot(this, renderer), new StingingAuditShot(this, renderer), new StingingAuditShot(this, renderer)];
 
 	this.x += -this.animations.scaleX;
 	if (!demoMode) {
@@ -945,15 +623,9 @@ function Player(demoMode, demoParams) {
 					element.tickActions(actions);
 				}.bind(this));
 
-				if (this.currentWeapon === "postit") {
 					this.shots.forEach(function(shot) {
 						shot.tickActions(actions);
 					}.bind(this));
-				} else if (this.currentWeapon === "stingingaudit") {
-					this.stingingAuditShots.forEach(function(shot) {
-						shot.tickActions(actions);
-					}.bind(this));
-				}
 
 
 				this.checkObjectCollisions();
@@ -1101,12 +773,7 @@ function Player(demoMode, demoParams) {
 
 		if (this.actions.playerAttack && this.shootTicks <= 0) {
 			//this.watchedElements.push(new Shot(this.stage, this, renderer));
-			var shot;
-			if (this.currentWeapon === "postit") {
-				shot = new Shot(this, renderer);
-				if (this.shots.length < 3) {
-					this.shots.push(shot);
-					shot.fireUp();
+			this.currentWeapon.shoot();
 					playSound("shoot");
 					if (this.animations.currentAnimation === "jump") {
 						this.animations.gotoAndPlay("jumpshoot");
@@ -1117,24 +784,6 @@ function Player(demoMode, demoParams) {
 					} else if (this.jumping && this.animations.currentAnimation === "damage") {
 						this.animations.gotoAndPlay("jumpshoot");
 					}
-				}
-			} else if (this.currentWeapon === "stingingaudit") {
-				shot = this.stingingAuditShots[this.shotIndex++ % 3];
-				if (shot.disabled) {
-					shot.fireUp();
-					playSound("shoot");
-					if (this.animations.currentAnimation === "jump") {
-						this.animations.gotoAndPlay("jumpshoot");
-					} else if (this.animations.currentAnimation === "run") {
-						this.animations.gotoAndPlay("runshoot");
-					} else if (this.animations.currentAnimation === "stand") {
-						this.animations.gotoAndPlay("standshoot");
-					} else if (this.jumping && this.animations.currentAnimation === "damage") {
-						this.animations.gotoAndPlay("jumpshoot");
-					}
-				}
-			}
-
 			this.shootTicks = 15; // not correct
 
 		}
@@ -1195,15 +844,9 @@ function Player(demoMode, demoParams) {
 			element.tickActions(actions);
 		}.bind(this));
 
-		if (this.currentWeapon === "postit" && this.shots.length > 0) {
 			this.shots.forEach(function(shot) {
 				shot.tickActions(actions);
 			}.bind(this));
-		} else if (this.currentWeapon === "stingingaudit") {
-			this.stingingAuditShots.forEach(function(shot) {
-				shot.tickActions(actions);
-			}.bind(this));
-		}
 
 		if (this.actions.playerDebug) {
 			//damageModifier = 1000;
