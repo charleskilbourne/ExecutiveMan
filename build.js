@@ -1,26 +1,49 @@
 var compressor = require('node-minify');
-var buildLevel = require('./leveljson/makelevel').buildLevel;
+var fs = require('fs');
 
-buildLevel('demo', 0);
-buildLevel('accountingman', 7);
-buildLevel('materialman', 8);
-buildLevel('visionaryman', 8);
-buildLevel('warehouseman', 0);
-buildLevel('wasteman', 6);
-buildLevel('hrman', 0);
-buildLevel('itman', 0);
-buildLevel('salesman', 0);
+
+const LEVEL_CONFIG_DIR = 'src/level-conf'
+var levelConfigurations = fs.readdirSync(LEVEL_CONFIG_DIR);
+
+levelConfigurations.forEach(dir => {
+  const leveldir = LEVEL_CONFIG_DIR + '/' + dir;
+  try{
+    fs.readdirSync(leveldir);
+    buildLevel(leveldir);
+  } catch(err){
+    console.log(leveldir, ' is not a directory');
+  }
+});
 
 compressor.minify({
     compressor: 'no-compress',
-    input: ['./libs/*.js', './levels/*.js', './objects/*.js', './enemies/*.js', './mechanics/*.js' ],
-    output: 'game.js',
+    input: ['src/**/*.js' ],
+    output: 'dist/game.js',
     callback: function (err, min) {}
 });
 
 compressor.minify({
   compressor: 'uglifyjs',
-  input: ['./libs/*.js', './levels/*.js', './objects/*.js', './enemies/*.js', './mechanics/*.js' ],
-  output: 'game.min.js',
+  input: ['src/**/*.js'],
+  output: 'dist/game.min.js',
   callback: function (err, min) {}
 });
+
+function buildLevel(leveldir){
+  console.log("Building level from directory: ", leveldir);
+  const levelConfig = JSON.parse(fs.readFileSync(leveldir + '/config.json', 'utf-8'));
+
+  let levelData = '';
+  const levelOutputPath = 'src/levels/' + levelConfig.levelName + 'level.js';
+  levelData += `var ${levelConfig.levelName}HalfwayPoint = ${levelConfig.halfwayPoint};\n`;
+  levelData += `var ${levelConfig.levelName}BossPoint = ${levelConfig.screens - 2};\n`;
+  levelData += `var ${levelConfig.levelName}maps = [];\n\n`;
+
+  for(var i = 1; i <= levelConfig.screens; i++){
+    var file = fs.readFileSync(leveldir + '/' + levelConfig.levelName + i + '.json', 'utf-8');
+    levelData += `${levelConfig.levelName}maps[${i - 1}] = ${file.replace(/\s/g,'')}\n`;
+  }
+  
+  const levelFile = fs.writeFileSync(levelOutputPath, levelData);
+  
+}

@@ -42,7 +42,7 @@ var HealthBar = function(stage, player) {
 
 		var offset = (28 - this.bars) * 2;
 		for (i = 0; i < this.bars; i++) {
-			var barItem = new createjs.Bitmap("images/healthbar.png");
+			var barItem = new createjs.Bitmap("resources/images/healthbar.png");
 			barItem.x = 19;
 			barItem.y = i * 2 + offset + this.y + 1;
 			this.barAnimations.push(barItem);

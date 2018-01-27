@@ -1,4 +1,3 @@
-const RESOURCE_ROOT = "resources/"
 var loadFiles = [{
 	id: "accountingman",
 	src: "images/accountingmansprite.png"
@@ -215,7 +214,7 @@ var loadFiles = [{
 }];
 
 loadFiles.map(file => {
-	file.src = RESOURCE_ROOT += file.src;
+	file.src = RESOURCE_ROOT + file.src;
 	return file;
 })
 /**
