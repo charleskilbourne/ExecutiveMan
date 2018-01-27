@@ -11,7 +11,6 @@
 - 'c' key - shoot
 
 #### Features
-- nearly 100% correct NES MegaMan gameplay
 - relatively easy to use touch controls
 - chrome, firefox, and internet explorer (including xbox) joystick support
 - save game support
@@ -36,31 +35,14 @@ See the [wiki](https://github.com/CamHenlin/ExecutiveMan/wiki) for developer inf
 - Add end of game sequence
 - Better developer docs
 
-To run locally:
+To build and run locally:
 ```
 git clone https://github.com/CamHenlin/ExecutiveMan.git
-
 cd ExecutiveMan
 
-python -m SimpleHTTPServer
-```
-Then visit http://localhost:8000/index.html for minified game or http://localhost:8000/testindex.html for unminified game
-
-To build minified game OR update levels after editing level json:
-```
-git clone https://github.com/CamHenlin/ExecutiveMan.git
-
-cd ExecutiveMan
-
-./compile.sh
-```
-
-### Now with Node Support
-to build and run locally with node:
-```
 npm install
 npm run build
-npm run start
+npm start
 ```
 Then navigate to http://localhost:8080
 
