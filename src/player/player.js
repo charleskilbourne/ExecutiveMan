@@ -133,10 +133,12 @@ function Player(demoMode, demoParams) {
 		this.x++;
 	}
 	this.animations.x = this.x;
-	this.shotIndex = 0;
 	this.ignoreLeftRightCollisionThisFrame = 0;
 	this.fallThroughFloor = false;
-	this.currentWeapon = new StickyNote(this, renderer);
+	this.weapons = {};
+	this.weapons['stickyNote'] = new StickyNote(this, renderer);
+	this.weapons['stingingAudit'] = new StingingAudit(this, renderer);
+	this.currentWeapon = this.weapons.stickyNote;
 	var skipThisCheck = false;
 
 	this.x += -this.animations.scaleX;
@@ -234,18 +236,9 @@ function Player(demoMode, demoParams) {
 	 * @return {[type]}        [description]
 	 */
 	this.changeWeapon = function(weapon) {
-		var loaderRequest = "";
-		this.currentWeapon = weapon;
-		if (weapon === "postit") {
-			loaderRequest = "businessman";
-		} else if (weapon === "stingingaudit") {
-			loaderRequest = "businessman_green";
-		} else if (weapon === "oretoss") {
-			loaderRequest = "businessman_brown";
-		} else if (weapon === "toxicprojectile") {
-			loaderRequest = "businessman_yellow";
-		}
-
+		this.currentWeapon = this.weapons[weapon];
+		var loaderRequest = "businessman" + this.currentWeapon.color;
+		
 		var newAnimationSprite = new createjs.SpriteSheet({
 			"images": [loader.getResult(loaderRequest)],
 			"frames": {
