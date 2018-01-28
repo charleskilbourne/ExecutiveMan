@@ -43,7 +43,9 @@ function buildLevel(leveldir){
     var file = fs.readFileSync(leveldir + '/' + levelConfig.levelName + i + '.json', 'utf-8');
     levelData += `${levelConfig.levelName}maps[${i - 1}] = ${file.replace(/\s/g,'')}\n`;
   }
-  
+  if (!fs.existsSync('src/levels')){
+    fs.mkdirSync('src/levels');
+}
   const levelFile = fs.writeFileSync(levelOutputPath, levelData);
   
 }
