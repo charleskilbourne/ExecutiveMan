@@ -17,7 +17,7 @@ levelConfigurations.forEach(dir => {
 
 compressor.minify({
     compressor: 'no-compress',
-    input: ['src/**/*.js' ],
+    input: ['libs/**/*.js', 'src/**/*.js' ],
     output: 'dist/game.js',
     callback: function (err, min) {}
 });

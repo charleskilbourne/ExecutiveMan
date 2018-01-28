@@ -140,7 +140,7 @@ function Player(demoMode, demoParams) {
 	this.weapons['stingingAudit'] = new StingingAudit(this, renderer);
 	this.currentWeapon = this.weapons.stickyNote;
 
-	//this.controls = new Controls(this);
+	this.controls = new Controls(this, demoMode);
 	var skipThisCheck = false;
 
 	this.x += -this.animations.scaleX;
@@ -153,84 +153,6 @@ function Player(demoMode, demoParams) {
 	}
 
 	this.watchedElements.push(this.healthbar);
-
-	if (!demoMode) {
-		document.onkeydown = function(event) {
-			switch (event.keyCode) {
-				case keyCodes.left:
-					// keyCode 37 is left arrow
-					this.actions.playerLeft = true;
-					break;
-
-				case keyCodes.right:
-					// keyCode 39 is right arrow
-					this.actions.playerRight = true;
-					break;
-
-
-				case keyCodes.jump:
-					// keyCode 32 is space
-					this.actions.playerJump = true;
-					break;
-
-				case keyCodes.shoot:
-					// keyCode 67 is c
-					this.actions.playerAttack = true;
-					break;
-
-
-				case 68:
-					// keyCode 68 is d
-					this.actions.playerDebug = true;
-					break;
-
-				case keyCodes.pause:
-					// keyCode 68 is p
-					if (this.paused) {
-						this.paused = false;
-						this.pauseMenu.remove();
-					} else {
-						this.paused = true;
-						this.pauseMenu.show();
-
-					}
-
-					break;
-			}
-		}.bind(this);
-
-		document.onkeyup = function(event) {
-			switch (event.keyCode) {
-				case keyCodes.left:
-					// keyCode 37 is left arrow
-					this.actions.playerLeft = false;
-					break;
-
-				case keyCodes.right:
-					// keyCode 39 is right arrow
-					this.actions.playerRight = false;
-					break;
-
-				case keyCodes.jump:
-					// keyCode 32 is space
-					this.actions.playerJump = false;
-					this.jumpreleased = true;
-					break;
-
-				case keyCodes.shoot:
-					// keyCode 67 is c
-					this.actions.playerAttack = false;
-					this.shootTicks = 1;
-					break;
-
-
-				case 68:
-					// keyCode 68 is d
-					this.actions.playerDebug = false;
-					break;
-			}
-		}.bind(this);
-	}
 	
 	/**
 	 * [changeWeapon description]
