@@ -139,6 +139,8 @@ function Player(demoMode, demoParams) {
 	this.weapons['stickyNote'] = new StickyNote(this, renderer);
 	this.weapons['stingingAudit'] = new StingingAudit(this, renderer);
 	this.currentWeapon = this.weapons.stickyNote;
+
+	//this.controls = new Controls(this);
 	var skipThisCheck = false;
 
 	this.x += -this.animations.scaleX;
@@ -229,7 +231,7 @@ function Player(demoMode, demoParams) {
 			}
 		}.bind(this);
 	}
-
+	
 	/**
 	 * [changeWeapon description]
 	 * @param  {[type]} weapon [description]
@@ -238,7 +240,7 @@ function Player(demoMode, demoParams) {
 	this.changeWeapon = function(weapon) {
 		this.currentWeapon = this.weapons[weapon];
 		var loaderRequest = "businessman" + this.currentWeapon.color;
-		
+
 		var newAnimationSprite = new createjs.SpriteSheet({
 			"images": [loader.getResult(loaderRequest)],
 			"frames": {
