@@ -1,4 +1,17 @@
-function StingingAudit(player, renderer) {
+function StingingAudit(player, renderer){
+	this.shotLimit = 1;
+	this.color = "_green";
+	this.shoot = function(){
+		if(player.shots.length < this.shotLimit){
+			var shot = new StingingAuditShot(player, renderer)
+			shot.fireUp();
+			player.shots.push(shot);
+		}
+	}
+}
+
+
+function StingingAuditShot(player, renderer) {
     var shotSpriteSheet = new createjs.SpriteSheet({
         "images": [loader.getResult("moneyspin")],
         "frames": {
